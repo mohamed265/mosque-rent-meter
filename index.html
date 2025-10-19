@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spendenzähler | عداد التبرعات</title>
+    <link rel="icon" href="assets/favicon.png" sizes="16x16">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            
+            /* Background image settings */
+            background-image: url('assets/background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            
+            position: relative;
+        }
+
+        /* Dark overlay for better readability */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            padding-top: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 85%;
+            backdrop-filter: blur(10px);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .progress-wrapper {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 40px;
+            background-color: #e0e0e0;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease, background 0.3s ease;
+            border-radius: 20px;
+            background: linear-gradient(90deg, #e4c47d 0%, #cb982a 100%);
+        }
+
+        .progress-bar.flash-red {
+            animation: flashRed 0.5s ease-in-out 3;
+        }
+
+        @keyframes flashRed {
+            0%, 100% {
+                opacity: 1;
+                background: linear-gradient(90deg, #E6C8C9 0%, #d32f2f 100%);
+            }
+            50% {
+                opacity: 0.3;
+                background: linear-gradient(90deg, #E6C8C9 0%, #d32f2f 100%);
+            }
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            z-index: 10;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .remaining-days {
+            text-align: right;
+            font-size: 18px;
+            font-weight: 600;
+            color: gray;
+            white-space: nowrap;
+        }
+
+        .remaining-days .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: black;
+        }
+
+        .main_image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin-bottom: 70px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        /* Images and text section - side by side */
+        .images-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .qr-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 0 0 auto;
+        }
+
+        .qr-item img {
+            max-width: 200px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .qr-item img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Animation when target not reached */
+        .qr-item img.pulse-scale {
+            animation: pulseScale 0.5s ease-in-out 3;
+        }
+
+        /* Sequential animation delays */
+        .qr-item:nth-child(1) img.pulse-scale {
+            animation-delay: 0s;
+        }
+
+        .qr-item:nth-child(2) img.pulse-scale {
+            animation-delay: 1.5s;
+        }
+
+        .qr-item:nth-child(3) img.pulse-scale {
+            animation-delay: 3s;
+        }
+
+        @keyframes pulseScale {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .qr-item h4 {
+            width: 300px;
+            margin: 0;
+            color: #333;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+
+        /* Middle text between images */
+        .middle-text {
+            flex: 0 1 auto;
+            /* max-width: 400px; */
+            text-align: center;
+            padding: 30px;
+            padding-bottom: 0%;
+        }
+
+        .middle-text h3 {
+            color: #cb982a;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .middle-text p {
+            color: #333;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* Responsive for smaller screens */
+        @media (max-width: 1024px) {
+            .images-container {
+                gap: 30px;
+            }
+
+            .middle-text {
+                max-width: 300px;
+                padding: 20px;
+            }
+
+            .middle-text h3 {
+                font-size: 18px;
+            }
+
+            .middle-text p {
+                font-size: 14px;
+            }
+
+            .remaining-days {
+                font-size: 16px;
+            }
+
+            .remaining-days .number {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .images-container {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .qr-item img {
+                max-width: 180px;
+            }
+
+            .middle-text {
+                max-width: 100%;
+                order: -1; /* Put text at top on mobile */
+            }
+
+            .progress-info {
+                justify-content: center;
+            }
+
+            .remaining-days {
+                text-align: center;
+                font-size: 16px;
+            }
+
+            .progress-text {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .qr-item img {
+                max-width: 150px;
+            }
+
+            .qr-item h4 {
+                font-size: 16px;
+            }
+
+            .middle-text p {
+                font-size: 13px;
+            }
+
+            .progress-text {
+                font-size: 24px;
+            }
+
+            .remaining-days {
+                font-size: 14px;
+            }
+
+            .remaining-days .number {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- main_image -->
+        <div class="main_image-container">
+            <img src="assets/main_image.png" alt="main image">
+        </div>
+
+        <h2>
+            Spendenzähler | 
+            عداد التبرعات  
+        </h2>
+        <h3>
+            Deine Moschee braucht dich genauso sehr, wie du sie brauchst |
+            مَسْجِدُكَ بِحَاجَةٍ إِلَيْكَ كَمَا أَنْتَ بِحَاجَةٍ إِلَيْهِ
+        </h3>
+        
+        <div class="progress-wrapper">
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+                <div class="progress-text" id="progressText">0%</div>
+            </div>
+            <div class="progress-info">
+                <div class="remaining-days" id="remainingDays">
+                    <span class="number">0</span>
+                     Tage verbleibend | الأيام المتبقية
+                </div>
+            </div>
+        </div>
+
+         <!-- Middle Text Section -->
+        <div class="middle-text">
+            <h3>{قُلْ إِنَّ رَبِّي يَبْسُطُ الرِّزْقَ لِمَن يَشَاءُ مِنْ عِبَادِهِ وَيَقْدِرُ لَهُ ۚ وَمَا أَنفَقْتُم مِّن شَيْءٍ فَهُوَ يُخْلِفُهُ ۖ وَهُوَ خَيْرُ الرَّازِقِينَ}</h3>
+            <p>
+                (سبأ : 39)
+            </p>
+        </div>
+
+        <!-- QR Codes with Text in Middle -->
+        <div class="images-container">
+             <!-- PayPal QR Code -->
+            <div class="qr-item">
+                <img src="assets/paypal_qr_code.png" alt="PayPal QR" class="donation-image">
+                <h4>PayPal<br>paypal@almogamma.de</h4>
+            </div>
+
+            <!-- Spende -->
+            <div class="qr-item">
+                <img src="assets/spende_icon.png" alt="Spende" class="donation-image">
+                <h4>
+                    صندوق التبرعات<br />
+                    Spendenbox
+                </h4>
+            </div>
+
+            <!-- Bank QR Code -->
+            <div class="qr-item">
+                <img src="assets/bank_qr-code.png" alt="Bank QR" class="donation-image">
+                <h4>Almogamma e.V.<br>DE67 4306 0967 1313 8068 00</h4>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        // Get URL parameters
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Calculate remaining days in current month
+        function getRemainingDaysInMonth() {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
+            
+            // Get the last day of current month (day 0 of next month)
+            const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+            const lastDay = lastDayOfMonth.getDate();
+            const currentDay = today.getDate();
+            
+            // Calculate remaining days (including today)
+            return lastDay - currentDay + 1;
+        }
+
+        // Update remaining days display
+        function updateRemainingDays() {
+            const remainingDays = getRemainingDaysInMonth();
+            const remainingDaysElement = document.getElementById('remainingDays');
+            
+            remainingDaysElement.innerHTML = `<span class="number">${remainingDays}</span> Tage verbleibend | الأيام المتبقية`;
+        }
+
+        const duration = 5000;
+
+        function startProgress(targetValue, currentValue) {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const donationImages = document.querySelectorAll('.donation-image');
+
+            // Reset
+            progressBar.classList.remove('flash-red');
+            progressBar.style.background = 'linear-gradient(90deg, #e4c47d 0%, #cb982a 100%)';
+            
+            // Remove animation class from images
+            donationImages.forEach(img => {
+                img.classList.remove('pulse-scale');
+            });
+
+            // Update remaining days
+            updateRemainingDays();
+
+            let current = 0;
+            const increment = currentValue / 50;
+            const stepTime = duration / 50;
+
+            const interval = setInterval(() => {
+                current += increment;
+                
+                if (current >= currentValue) {
+                    current = currentValue;
+                    clearInterval(interval);
+                    
+                    // Check if goal was not reached
+                    if (currentValue < targetValue) {
+                        progressBar.classList.add('flash-red');
+                        progressBar.style.background = 'linear-gradient(90deg, #E6C8C9 0%, #d32f2f 100%)';
+                        
+                        // Add pulse animation to donation images sequentially
+                        donationImages.forEach(img => {
+                            img.classList.add('pulse-scale');
+                        });
+                    }
+                }
+                
+                const percentage = (current / targetValue) * 100;
+                const displayPercentage = Math.min(percentage, 100);
+                
+                // Update width
+                progressBar.style.width = displayPercentage + '%';
+                
+                // Update text
+                progressText.textContent = Math.round(displayPercentage) + '%';
+            }, stepTime);
+        }
+
+        function start() {
+            // Read parameters from URL
+            const targetValue = parseInt(getUrlParameter('target')) || 100;
+            const currentValue = parseInt(getUrlParameter('current')) || 75;
+            
+            // Validate values
+            if (isNaN(targetValue) || isNaN(currentValue) || targetValue <= 0 || currentValue < 0) {
+                alert('Invalid parameters! Use: ?target=100&current=75');
+                progressText.textContent = 'Error';
+                return;
+            }
+
+            // Start progress automatically
+            startProgress(targetValue, currentValue);
+        };
+
+        // Auto-start on page load
+        window.onload = start
+
+        setInterval(start, duration * 3);
+    </script>
+</body>
+</html>
