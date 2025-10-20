@@ -481,7 +481,7 @@
             // Start progress automatically
             startProgress(targetValue, currentValue, duration);
 
-            setInterval(start, duration * 3);
+            setInterval(() => startProgress(targetValue, currentValue, duration), duration * 3);
         };
 
         // Auto-start on page load
