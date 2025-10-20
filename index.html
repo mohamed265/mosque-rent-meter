@@ -328,7 +328,7 @@
         </h2>
         <h3>
             Deine Moschee braucht dich, so wie du sie brauchst |
-            مَسْجِدُكَ بِحَاجَةٍ إِلَيْكَ كَمَا أَنْتَ بِحَاجَةٍ إِلَيْهِ
+            مسجدك بحاجة إليك كما أنت بحاجة إليه
         </h3>
         
         <div class="progress-wrapper">
@@ -404,13 +404,17 @@
         function updateRemainingDays() {
             const remainingDays = getRemainingDaysInMonth();
             const remainingDaysElement = document.getElementById('remainingDays');
-            
-            remainingDaysElement.innerHTML = `<span class="number">${remainingDays}</span> Tage verbleibend | الأيام المتبقية`;
+
+            if (remainingDays == 1) {
+                remainingDaysElement.innerHTML = `<span class="number">${remainingDays}</span> Tage verbleibend | يوم متبقي`;
+            } else if (remainingDays < 11) {
+                remainingDaysElement.innerHTML = `<span class="number">${remainingDays}</span> Tage verbleibend | أيام متبقية`;
+            } else {
+                remainingDaysElement.innerHTML = `<span class="number">${remainingDays}</span> Tage verbleibend | يوم متبقي`;
+            }
         }
 
-        const duration = 5000;
-
-        function startProgress(targetValue, currentValue) {
+        function startProgress(targetValue, currentValue, duration) {
             const progressBar = document.getElementById('progressBar');
             const progressText = document.getElementById('progressText');
             const donationImages = document.querySelectorAll('.donation-image');
@@ -463,8 +467,9 @@
 
         function start() {
             // Read parameters from URL
-            const targetValue = parseInt(getUrlParameter('target')) || 100;
-            const currentValue = parseInt(getUrlParameter('current')) || 75;
+            const targetValue = parseInt(getUrlParameter('target'));
+            const currentValue = parseInt(getUrlParameter('current'));
+            const duration = 5000;
             
             // Validate values
             if (isNaN(targetValue) || isNaN(currentValue) || targetValue <= 0 || currentValue < 0) {
@@ -474,13 +479,14 @@
             }
 
             // Start progress automatically
-            startProgress(targetValue, currentValue);
+            startProgress(targetValue, currentValue, duration);
+
+            setInterval(start, duration * 3);
         };
 
         // Auto-start on page load
         window.onload = start
 
-        setInterval(start, duration * 3);
     </script>
 </body>
 </html>
