@@ -378,6 +378,7 @@
     </div>
 
     <script>
+        var isRunning = false;
 
         // Get URL parameters
         function getUrlParameter(name) {
@@ -415,6 +416,10 @@
         }
 
         function startProgress(targetValue, currentValue, duration) {
+            if(isRunning) {
+                 return; //return if timer is already running
+            }
+            isRunning = true; //specify that the timer is running
             const progressBar = document.getElementById('progressBar');
             const progressText = document.getElementById('progressText');
             const donationImages = document.querySelectorAll('.donation-image');
@@ -440,6 +445,7 @@
                 
                 if (current >= currentValue) {
                     current = currentValue;
+                    isRunning = false; //specify that the timer is not running and can be run again
                     clearInterval(interval);
                     
                     // Check if goal was not reached
